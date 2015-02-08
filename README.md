@@ -1,6 +1,11 @@
 The MIT Tech
 ===============
 
+Screenshot
+----------
+
+![Screenshot of the website](https://dl.dropboxusercontent.com/u/49449391/Screen%20Shot%202015-02-08%20at%201.22.33%20PM.png)
+
 Dependencies
 ------------
 
