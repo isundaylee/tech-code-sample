@@ -1,0 +1,16 @@
+<div class="author-header">
+  <div class="author-img">
+    <img src="<%= @author.portrait.url(:medium) %>" alt="">
+  </div>
+  <div class="author-info">
+    <h1><%= @author.name %></h1>
+    <span class="article-count"><%= pluralize @articles.count, 'article' %> in <%= sections @articles.map { |a| a.meta(:section_name) } %></span>
+    <div class="author-bio">
+      <%= @author.bio.split("\n").map(&method(:simple_format)).join("\n").html_safe rescue '' %>
+    </div>
+  </div>
+</div>
+
+<%= render 'frontend_pieces/article_list', articles: @articles %>
+
+<%= paginate @pieces %>

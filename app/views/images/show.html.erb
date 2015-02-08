@@ -1,0 +1,124 @@
+<p id="notice"><%= notice %></p>
+
+<div class="row">
+  <div class="col-md-6">
+    <% if @image.caption.present? %>
+      <h1><%= @image.caption %></h1>
+    <% else %>
+      <h1>Uncaptioned Image</h1>
+    <% end %>
+
+    <% if @image.attribution.present? %>
+      <p id="attribution"><%= @image.attribution %></p>
+    <% else %>
+      <p id="attribution">No attribution present. </p>
+    <% end %>
+
+    <p>
+      <% if @image.primary_piece %>
+        <% for tag in @image.primary_piece.tags %>
+          <span class="label label-primary"><%= tag %></span>
+        <% end %>
+      <% end %>
+    </p>
+
+    <% if @image.primary_piece %>
+      <div class="form-group">
+        <%= form_for(@image) do |f| %>
+          <%= f.select :web_status, @image.web_statuses_for_select.to_a.map { |k| [Image::WEB_STATUS_NAMES[k.to_sym], k] }, {}, {class: 'form-control', data: {auto_submit: true}, disabled: @image.web_published?} %>
+        <% end %>
+      </div>
+
+      <div class="form-group">
+        <%= form_for(@image) do |f| %>
+          <%= f.select :print_status, Image.print_statuses.keys.to_a.map { |k| [Image::PRINT_STATUS_NAMES[k.to_sym], k] }, {}, {class: 'form-control', data: {auto_submit: true}} %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <table class="table" id="assigned_pieces">
+      <tbody>
+        <tr>
+          <th>Assigned to Piece</th>
+          <th>Actions</th>
+        </tr>
+
+        <% if @image.primary_piece %>
+          <tr>
+            <td><%= @image.primary_piece.name %></td>
+            <td>
+
+            </td>
+          </tr>
+        <% end %>
+
+        <% for piece in @image.pieces %>
+          <tr>
+            <td><%= piece.name %></td>
+            <td>
+              <%= form_tag unassign_piece_image_path(@image) do %>
+                <%= hidden_field_tag :piece_id, piece.id %>
+                <%= submit_tag 'Unassign Piece', data: {confirm: 'Are you sure that you want to remove the piece from the list of assigned pieces? '} %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+
+        <% unless @assignable_pieces.empty? %>
+          <tr>
+            <%= form_tag assign_piece_image_path(@image) do %>
+              <td>
+                <%= select_tag :piece_id, options_for_select(@assignable_pieces.map do |p|
+                    [truncate(p.name, length: 50, separator: ' '), p.id]
+                  end) %>
+              </td>
+              <td>
+                <%= submit_tag 'Assign Piece' %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-md-6">
+    <div id="pictures_toggle" class="btn-group" role="group">
+      <% @image.pictures.each_with_index do |p, i| %>
+        <button class="btn btn-default" data-picture-id="picture_<%= i %>">Picture #<%= i %></button>
+      <% end %>
+    </div>
+
+    <div id="pictures">
+      <% if @image.pictures.empty? %>
+        <p>No file attached to this image. </p>
+
+        <%= form_tag image_pictures_path(@image), multipart: true do %>
+          <span class="btn btn-info btn-file">
+            Upload <%= file_field_tag "pictures[]", type: :file, multiple: true, id: 'images_field' %>
+          </span>
+        <% end %>
+      <% else %>
+        <% @image.pictures.each_with_index do |p, i| %>
+          <div id="picture_<%= i %>">
+            <%= image_tag p.content.url %>
+            <%= link_to 'Remove Picture', image_picture_path(@image, p), method: :delete, class: 'btn btn-danger', data: {confirm: 'Do you really want to remove this picture? '} %>
+
+            <%= form_tag image_pictures_path(@image), multipart: true, class: 'upload_pictures_form' do %>
+              <span class="btn btn-info btn-file">
+                Upload <%= file_field_tag "pictures[]", type: :file, multiple: true, id: 'images_field' %>
+              </span>
+            <% end %>
+          </div>
+
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+</div>
+
+
+<%= link_to 'Edit', edit_image_path(@image) %> |
+<%= link_to 'Back', images_path %>
